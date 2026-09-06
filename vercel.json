@@ -1,0 +1,10 @@
+{
+  "cleanUrls": true,
+  "redirects": [
+    {
+      "source": "/activar",
+      "destination": "https://fnolzmacqnaxcktlxhxx.supabase.co/functions/v1/google-oauth-start",
+      "permanent": false
+    }
+  ]
+}

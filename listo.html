@@ -1,0 +1,63 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Walle · Cuenta conectada</title>
+<style>
+  *{box-sizing:border-box;margin:0;padding:0}
+  body{
+    font-family:-apple-system,BlinkMacSystemFont,"Segoe UI",Roboto,"Helvetica Neue",Arial,sans-serif;
+    background:#f6f7f9;color:#111827;
+    min-height:100vh;display:flex;align-items:center;justify-content:center;padding:24px;
+  }
+  .card{
+    background:#fff;border-radius:20px;padding:40px 32px;max-width:420px;width:100%;
+    text-align:center;box-shadow:0 4px 24px rgba(0,0,0,.07);
+  }
+  .badge{
+    width:72px;height:72px;border-radius:50%;
+    display:flex;align-items:center;justify-content:center;margin:0 auto 24px;
+    font-size:34px;line-height:1;
+  }
+  .ok{background:#dcfce7;color:#16a34a}
+  .warn{background:#fef3c7;color:#d97706}
+  h1{font-size:22px;font-weight:650;margin-bottom:10px;letter-spacing:-.01em}
+  p{font-size:15px;line-height:1.55;color:#5b6472;margin-bottom:28px}
+  .btn{
+    display:block;width:100%;padding:14px 20px;border-radius:12px;
+    font-size:15px;font-weight:600;text-decoration:none;margin-bottom:10px;
+  }
+  .btn-primary{background:#16a34a;color:#fff}
+  .btn-secondary{background:#eef0f3;color:#111827}
+  .brand{margin-top:26px;font-size:12px;color:#9aa3af;letter-spacing:.04em}
+</style>
+</head>
+<body>
+  <div class="card">
+    <div class="badge ok" id="icon">&#10003;</div>
+    <h1 id="title">Tu cuenta quedó conectada</h1>
+    <p id="msg">Ya creamos tu hoja de gastos privada en tu Google Drive. Vuelve a WhatsApp y empieza a registrar.</p>
+    <a class="btn btn-primary" href="https://wa.me/16292475517">Volver a WhatsApp</a>
+    <a class="btn btn-secondary" id="sheetBtn" href="#" style="display:none">Ver mi hoja de gastos</a>
+    <div class="brand">WALLE · Finanzas personales</div>
+  </div>
+<script>
+  var p = new URLSearchParams(location.search);
+  var sheet = p.get('sheet');
+  var err = p.get('error');
+
+  if (err) {
+    document.getElementById('icon').textContent = '!';
+    document.getElementById('icon').className = 'badge warn';
+    document.getElementById('title').textContent = 'No se completó la conexión';
+    document.getElementById('msg').textContent =
+      'No pudimos conectar tu Google Drive. Vuelve a WhatsApp e inténtalo de nuevo.';
+  } else if (sheet && /^[A-Za-z0-9_-]+$/.test(sheet)) {
+    var b = document.getElementById('sheetBtn');
+    b.href = 'https://docs.google.com/spreadsheets/d/' + sheet + '/edit';
+    b.style.display = 'block';
+  }
+</script>
+</body>
+</html>
