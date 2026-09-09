@@ -66,7 +66,7 @@ function designRequests(movId,graphId,name,existingRows=[],year=new Date().getFu
  req.push({updateDimensionProperties:{range:{sheetId:movId,dimension:'COLUMNS',startIndex:8,endIndex:9},properties:{pixelSize:260},fields:'pixelSize'}});
  req.push({updateDimensionProperties:{range:{sheetId:movId,dimension:'COLUMNS',startIndex:0,endIndex:1},properties:{hiddenByUser:true},fields:'hiddenByUser'}});
  req.push({updateDimensionProperties:{range:{sheetId:movId,dimension:'ROWS',startIndex:0,endIndex:1},properties:{pixelSize:36},fields:'pixelSize'}});
- for(const [col,type,pattern] of [[1,'DATE','dd/mm/yyyy'],[3,'NUMBER','#,##0.00']])req.push({repeatCell:{range:{sheetId:movId,startRowIndex:1,startColumnIndex:col,endColumnIndex:col+1},cell:{userEnteredFormat:{numberFormat:{type,pattern}}},fields:'userEnteredFormat.numberFormat'}});
+ for(const [col,type,pattern] of [[1,'DATE','dd/mm/yyyy'],[2,'TIME','hh:mm:ss'],[3,'NUMBER','#,##0.00']])req.push({repeatCell:{range:{sheetId:movId,startRowIndex:1,startColumnIndex:col,endColumnIndex:col+1},cell:{userEnteredFormat:{numberFormat:{type,pattern}}},fields:'userEnteredFormat.numberFormat'}});
  for(const [type,bg,fg] of [['ingreso',C.mint,C.green],['egreso',C.rose,C.red]])req.push({addConditionalFormatRule:{index:0,rule:{ranges:[{sheetId:movId,startRowIndex:1,startColumnIndex:0,endColumnIndex:13}],booleanRule:{condition:{type:'CUSTOM_FORMULA',values:[{userEnteredValue:`=$L2="${type}"`}]},format:{backgroundColor:bg,textFormat:{foregroundColor:fg}}}}}});
  req.push({setDataValidation:{range:{sheetId:movId,startRowIndex:1,startColumnIndex:11,endColumnIndex:12},rule:{condition:{type:'ONE_OF_LIST',values:[{userEnteredValue:'ingreso'},{userEnteredValue:'egreso'}]},strict:true,showCustomUi:true}}});
  req.push({updateSheetProperties:{properties:{sheetId:graphId,gridProperties:{hideGridlines:true},tabColorStyle:{rgbColor:C.blue}},fields:'gridProperties.hideGridlines,tabColorStyle'}});
@@ -98,6 +98,7 @@ function designRequests(movId,graphId,name,existingRows=[],year=new Date().getFu
  req.push({createDeveloperMetadata:{developerMetadata:{metadataKey:'walle_schema',metadataValue:'2',location:{spreadsheet:true},visibility:'DOCUMENT'}}});
  return req;
 }
+
 
 // Runtime appended to core.mjs by build.mjs; secrets remain in Supabase.
 const SB_URL=Deno.env.get('SUPABASE_URL');

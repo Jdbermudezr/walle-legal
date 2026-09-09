@@ -28,7 +28,12 @@ Deno.serve(async req=>{
   const encrypted=token.refresh_token?await encrypt(token.refresh_token):existing?.refresh_token_encrypted;
   if(!encrypted)return landing({error:'token'});
   let spreadsheetId=existing?.spreadsheet_id;
-  // Reuse the user's sheet on reconnection; never replace existing movements.
+  if(spreadsheetId){
+   const accessCheck=await fetch('https://sheets.googleapis.com/v4/spreadsheets/'+encodeURIComponent(spreadsheetId)+'?fields=spreadsheetId',{headers:{Authorization:'Bearer '+token.access_token}});
+   if(accessCheck.status===403||accessCheck.status===404)spreadsheetId=null;
+   else if(!accessCheck.ok)return landing({error:'sheet'});
+  }
+  // Reuse accessible sheets; a different Google account receives its own new sheet.
   if(!spreadsheetId){
    const headers=['id_gasto','fecha','hora','valor','moneda','categoria','evento','comercio_lugar','descripcion','medio_pago','fuente'];
    const created=await fetch('https://sheets.googleapis.com/v4/spreadsheets',{method:'POST',headers:{Authorization:`Bearer ${token.access_token}`,'Content-Type':'application/json'},body:JSON.stringify({properties:{title:`Matriz de ${phone.replace('whatsapp:','')}`,timeZone:'America/Bogota',locale:'es_CO'},sheets:[{properties:{title:'Gastos'},data:[{rowData:[{values:headers.map(stringValue=>({userEnteredValue:{stringValue}}))}]}]}]})});
