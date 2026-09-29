@@ -115,6 +115,10 @@ header{display:flex;align-items:center;gap:12px;margin-bottom:16px}
 .dot{width:8px;height:8px;border-radius:3px;flex:none}
 .kpi .val{font-size:26px;font-weight:800;letter-spacing:-1px;margin-top:9px;font-variant-numeric:tabular-nums}
 .kpi .sub{font-size:12px;color:var(--ink3);margin-top:5px}
+button.kpi{display:block;width:100%;text-align:left;font:inherit;cursor:pointer;color:var(--ink)}
+.kpi .ver{margin-top:8px;font-size:11.5px;font-weight:700;color:var(--ink3)}
+.tipos{display:flex;width:100%;margin-bottom:10px}
+.tipos button{flex:1}
 .pos{color:var(--in)} .neg{color:var(--out)}
 
 /* ============ cards ============ */
@@ -255,7 +259,7 @@ function pantalla(icono,titulo,texto,botones){
 }
 
 /* ================= estado ================= */
-const S={data:null,tab:'resumen',periodo:'mes',desde:'',hasta:'',moneda:'COP',cats:[],q:'',tope:15,tema:'light'};
+const S={data:null,tab:'resumen',periodo:'mes',desde:'',hasta:'',moneda:'COP',cats:[],tipo:'',q:'',tope:15,tema:'light'};
 try{const t=localStorage.getItem('walle_tema'); if(t)S.tema=t;}catch(e){}
 function aplicarTema(){
   document.documentElement.dataset.theme=S.tema;
@@ -290,6 +294,7 @@ function filtrados(conCat=true){
   return S.data.movimientos.filter(m=>
     m.moneda===S.moneda && (!a||m.fecha>=a) && m.fecha<=b &&
     (!conCat||!S.cats.length||S.cats.includes(m.categoria)) &&
+    (!conCat||!S.tipo||m.tipo===S.tipo) &&
     (!S.q||(m.comercio+' '+m.descripcion+' '+m.categoria+' '+m.evento).toLowerCase().includes(S.q)));
 }
 
@@ -409,6 +414,7 @@ function render(){
   const monedas=[...new Set(d.movimientos.map(m=>m.moneda))];
   const nom=(d.nombre||'').split(/\s+/)[0]||'';
   const cats=[...new Set(sinCat.filter(m=>m.tipo==='egreso').map(m=>m.categoria))].sort();
+  const nIng=sinCat.filter(m=>m.tipo==='ingreso').length, nEgr=sinCat.filter(m=>m.tipo==='egreso').length;
   const P=[['mes','Mes actual'],['pasado','Mes pasado'],['ytd','YTD'],['todo','Todo']];
 
   $.innerHTML=`
@@ -445,10 +451,10 @@ function render(){
 
   ${S.tab==='resumen'?`
   <div class="kpis">
-    <div class="kpi i"><div class="lbl"><i class="dot" style="background:var(--in)"></i>Ingresos</div>
-      <div class="val pos">${nf(ing,S.moneda)}</div></div>
-    <div class="kpi g"><div class="lbl"><i class="dot" style="background:var(--out)"></i>Gastos</div>
-      <div class="val neg">${nf(egr,S.moneda)}</div></div>
+    <button class="kpi i" data-tipo="ingreso"><div class="lbl"><i class="dot" style="background:var(--in)"></i>Ingresos</div>
+      <div class="val pos">${nf(ing,S.moneda)}</div><div class="ver">Ver los ${nIng} →</div></button>
+    <button class="kpi g" data-tipo="egreso"><div class="lbl"><i class="dot" style="background:var(--out)"></i>Gastos</div>
+      <div class="val neg">${nf(egr,S.moneda)}</div><div class="ver">Ver los ${nEgr} →</div></button>
     <div class="kpi b wide"><div class="lbl">Balance</div>
       <div class="val ${bal>=0?'pos':'neg'}">${bal>=0?'+':'−'}${nf(Math.abs(bal),S.moneda)}</div>
       <div class="sub">${ing>0?`Gastaste el ${Math.round(egr/ing*100)}% de lo que entró`:'Sin ingresos en el periodo'}</div></div>
@@ -469,6 +475,10 @@ function render(){
   :`
   <div class="card">
     <input class="search" id="q" placeholder="Buscar comercio, categoría o evento…" value="${esc(S.q)}">
+    <div class="seg tipos">
+      ${[['','Todos'],['ingreso','Ingresos'],['egreso','Gastos']].map(([v,t])=>
+        `<button data-t="${v}" aria-pressed="${S.tipo===v}">${t}</button>`).join('')}
+    </div>
     <div class="filtros">
       <button id="fTodas" aria-pressed="${!S.cats.length}">Todas</button>
       <button class="abre" id="fCats" aria-pressed="${S.cats.length>0}">
@@ -503,6 +513,10 @@ function render(){
     const ir=()=>{S.cats=[el.dataset.cat];S.tab='movs';S.tope=15;render();window.scrollTo({top:0,behavior:'smooth'})};
     el.onclick=ir; el.onkeydown=e=>{if(e.key==='Enter'||e.key===' '){e.preventDefault();ir()}};
   });
+  $.querySelectorAll('.kpi[data-tipo]').forEach(b=>b.onclick=()=>{
+    S.tipo=b.dataset.tipo; S.tab='movs'; S.tope=15; render();
+    window.scrollTo({top:0,behavior:'smooth'}); });
+  $.querySelectorAll('.tipos button').forEach(b=>b.onclick=()=>{S.tipo=b.dataset.t;S.tope=15;render()});
   const fT=document.getElementById('fTodas');
   if(fT)fT.onclick=()=>{S.cats=[];S.tope=15;render()};
   const fC=document.getElementById('fCats');
