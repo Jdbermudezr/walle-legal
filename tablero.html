@@ -22,17 +22,17 @@
   --r:20px; --r2:14px;
 }
 html[data-theme="dark"]{
-  --bg:#0A1410; --bg2:#0D1A15; --surf:#121F19; --surf2:#16261E;
-  --line:#1F332A; --line2:#2A4436;
-  --ink:#ECF3EE; --ink2:#9FB3A8; --ink3:#6C8276;
-  --in:#2E9E63; --out:#B8862A;          /* validado modo oscuro */
-  --brand:#39C182; --gold:#E0BC63;
-  --tint:rgba(46,158,99,.12);
-  --sh-s:0 1px 2px rgba(0,0,0,.4);
-  --sh-m:0 4px 10px rgba(0,0,0,.35), 0 16px 40px rgba(0,0,0,.3);
-  --sh-in:inset 0 1px 0 rgba(255,255,255,.05);
-  --grad:linear-gradient(160deg,#16261E 0%,#101C16 100%);
-  --grad-brand:linear-gradient(145deg,#1E7A50 0%,#0E3D2A 100%);
+  --bg:#0F1113; --bg2:#171A1D; --surf:#1A1E21; --surf2:#202528;
+  --line:#2A3034; --line2:#3A4248;
+  --ink:#ECEFF1; --ink2:#A3ADB3; --ink3:#727E85;
+  --in:#2E9E63; --out:#B8862A;          /* validado sobre superficie carbon */
+  --brand:#3DB87A; --gold:#D3A748;
+  --tint:rgba(46,158,99,.13);
+  --sh-s:0 1px 2px rgba(0,0,0,.5);
+  --sh-m:0 4px 10px rgba(0,0,0,.45), 0 16px 40px rgba(0,0,0,.35);
+  --sh-in:inset 0 1px 0 rgba(255,255,255,.04);
+  --grad:linear-gradient(160deg,#202528 0%,#171A1D 100%);
+  --grad-brand:linear-gradient(145deg,#2E9E63 0%,#1B6B43 100%);
 }
 *{box-sizing:border-box;margin:0;padding:0;-webkit-tap-highlight-color:transparent}
 html,body{background:var(--bg);color:var(--ink)}
@@ -84,10 +84,21 @@ header{display:flex;align-items:center;gap:12px;margin-bottom:16px}
 .rango{display:flex;align-items:center;gap:9px;margin:10px 0 16px;flex-wrap:wrap}
 .rango .txt{font-size:13px;color:var(--ink2);font-weight:600}
 .rango .txt b{color:var(--ink);font-weight:750}
-.fechas{display:flex;align-items:center;gap:7px}
+.custom{width:100%;display:flex;align-items:center;justify-content:space-between;gap:8px;
+  border:1px solid var(--line);background:var(--surf);color:var(--ink2);font:inherit;font-size:13.5px;
+  font-weight:650;padding:12px 15px;border-radius:14px;cursor:pointer;box-shadow:var(--sh-s);
+  margin-bottom:14px;transition:.16s}
+.custom:hover{border-color:var(--line2)}
+.custom.on{background:var(--grad-brand);color:#fff;border-color:transparent;margin-bottom:9px;
+  box-shadow:0 4px 14px rgba(27,122,70,.28)}
+.custom .cv{font-size:10px;opacity:.7}
+.fechas{display:grid;grid-template-columns:1fr 1fr;gap:10px;margin-bottom:16px;
+  background:var(--surf2);border:1px solid var(--line);border-radius:14px;padding:12px}
+.fechas label{display:flex;flex-direction:column;gap:5px;font-size:11px;font-weight:700;
+  letter-spacing:.6px;text-transform:uppercase;color:var(--ink3)}
 .fechas input{border:1px solid var(--line);background:var(--surf);color:var(--ink);border-radius:10px;
-  padding:7px 9px;font:inherit;font-size:12.5px;box-shadow:var(--sh-s)}
-.fechas span{color:var(--ink3);font-size:12px}
+  padding:10px;font:inherit;font-size:14px;width:100%}
+.fechas input:focus{outline:none;border-color:var(--in)}
 
 /* ============ kpis ============ */
 .kpis{display:grid;grid-template-columns:1fr 1fr;gap:11px;margin-bottom:14px}
@@ -115,7 +126,7 @@ header{display:flex;align-items:center;gap:12px;margin-bottom:16px}
 
 /* ============ chart ============ */
 .plot{position:relative}
-svg.chart{display:block;width:100%;height:215px;overflow:visible}
+svg.chart{display:block;width:100%;height:215px;overflow:visible;touch-action:pan-y}
 .axis{fill:var(--ink3);font-size:11px;font-weight:600}
 .barlbl{font-size:11px;font-weight:750}
 .gridline{stroke:var(--line);stroke-width:1}
@@ -123,7 +134,7 @@ rect.bar{transition:opacity .15s}
 g.grp.dim rect.bar{opacity:.35}
 .tip{position:absolute;pointer-events:none;background:var(--surf);border:1px solid var(--line2);
   border-radius:12px;padding:9px 11px;box-shadow:var(--sh-m);font-size:12px;min-width:140px;
-  opacity:0;transform:translate(-50%,-112%);transition:opacity .12s;z-index:5}
+  opacity:0;transform:translate(-50%,-100%);transition:opacity .12s;z-index:5;touch-action:none}
 .tip.on{opacity:1}
 .tip b{display:block;font-size:12px;margin-bottom:6px;color:var(--ink)}
 .tip .l{display:flex;align-items:center;justify-content:space-between;gap:12px;color:var(--ink2);margin-top:3px}
@@ -223,7 +234,7 @@ try{const t=localStorage.getItem('walle_tema'); if(t)S.tema=t;}catch(e){}
 function aplicarTema(){
   document.documentElement.dataset.theme=S.tema;
   const mt=document.querySelector('meta[name="theme-color"]');
-  if(mt)mt.setAttribute('content',S.tema==='dark'?'#0A1410':'#F6F4EE');
+  if(mt)mt.setAttribute('content',S.tema==='dark'?'#0F1113':'#F6F4EE');
   try{localStorage.setItem('walle_tema',S.tema)}catch(e){}
 }
 
@@ -291,7 +302,8 @@ function armarTooltip(){
   const svg=document.getElementById('svgm'), tip=document.getElementById('tip');
   if(!svg||!tip)return;
   const grupos=[...svg.querySelectorAll('.grp')];
-  const mostrar=g=>{
+  let fijo=null;
+  const pintar=g=>{
     grupos.forEach(x=>x.classList.toggle('dim',x!==g));
     const k=g.dataset.k, i=+g.dataset.in, o=+g.dataset.out, bal=i-o;
     const [yy,mm]=k.split('-');
@@ -299,21 +311,28 @@ function armarTooltip(){
       <div class="l"><span><i style="background:var(--in)"></i>Ingresos</span><b>${nf(i,S.moneda)}</b></div>
       <div class="l"><span><i style="background:var(--out)"></i>Gastos</span><b>${nf(o,S.moneda)}</b></div>
       <div class="l"><span>Balance</span><b style="color:${bal>=0?'var(--in)':'var(--out)'}">${bal>=0?'+':'−'}${nf(Math.abs(bal),S.moneda)}</b></div>`;
-    const r=svg.getBoundingClientRect(), box=svg.viewBox.baseVal;
-    const escala=r.width/box.width, offX=(r.width-box.width*escala)/2;
-    tip.style.left=Math.max(80,Math.min(r.width-80,offX+(+g.dataset.cx)*escala))+'px';
-    tip.style.top=(r.height*0.58)+'px';
+    // posicion real de la barra, no un estimado: se mide en pantalla
+    const barra=g.querySelector('rect.bar');
+    const rb=barra.getBoundingClientRect(), rp=tip.parentNode.getBoundingClientRect();
+    const ancho=tip.offsetWidth||150;
+    let x=rb.left-rp.left+rb.width;
+    x=Math.max(ancho/2+4, Math.min(rp.width-ancho/2-4, x));
+    tip.style.left=x+'px';
+    tip.style.top=Math.max(4, rb.top-rp.top-8)+'px';
     tip.classList.add('on');
   };
-  const ocultar=()=>{grupos.forEach(x=>x.classList.remove('dim'));tip.classList.remove('on')};
+  const limpiar=()=>{fijo=null;grupos.forEach(x=>x.classList.remove('dim'));tip.classList.remove('on')};
   grupos.forEach(g=>{
-    g.addEventListener('mouseenter',()=>mostrar(g));
-    g.addEventListener('touchstart',e=>{mostrar(g)},{passive:true});
+    g.addEventListener('mouseenter',()=>{if(!fijo)pintar(g)});
+    g.addEventListener('pointerdown',e=>{
+      if(e.pointerType==='mouse')return;
+      e.preventDefault();
+      if(fijo===g){limpiar();}else{fijo=g;pintar(g);}
+    });
   });
-  svg.addEventListener('mouseleave',ocultar);
-  document.addEventListener('touchend',ocultar,{passive:true});
+  svg.addEventListener('mouseleave',()=>{if(!fijo)limpiar()});
+  document.addEventListener('pointerdown',e=>{ if(fijo&&!svg.contains(e.target))limpiar(); },true);
 }
-
 function listaCategorias(movs){
   const map=new Map();
   for(const m of movs){ if(m.tipo!=='egreso')continue;
@@ -355,15 +374,16 @@ function listaMovs(movs){
 /* ================= render ================= */
 function render(){
   const d=S.data;
-  const movs=filtrados();
   const sinCat=filtrados(false);
+  // La categoria solo vive en la pestaña Movimientos: en el Resumen filtraria sin que se vea.
+  const movs=S.tab==='movs'?filtrados(true):sinCat;
   const ing=movs.filter(m=>m.tipo==='ingreso').reduce((s,m)=>s+m.valor,0);
   const egr=movs.filter(m=>m.tipo==='egreso').reduce((s,m)=>s+m.valor,0);
   const bal=ing-egr;
   const monedas=[...new Set(d.movimientos.map(m=>m.moneda))];
   const nom=(d.nombre||'').split(/\s+/)[0]||'';
   const cats=[...new Set(sinCat.filter(m=>m.tipo==='egreso').map(m=>m.categoria))].sort();
-  const P=[['mes','Mes actual'],['pasado','Mes pasado'],['ytd','YTD'],['todo','Todo'],['custom','Personalizado']];
+  const P=[['mes','Mes actual'],['pasado','Mes pasado'],['ytd','YTD'],['todo','Todo']];
 
   $.innerHTML=`
   <header>
@@ -389,10 +409,13 @@ function render(){
   </div>
   <div class="rango">
     <div class="txt"><b>${esc(etiquetaRango())}</b> · ${movs.length} movimiento${movs.length===1?'':'s'}</div>
-    ${S.periodo==='custom'?`<div class="fechas">
-      <input type="date" id="d1" value="${S.desde}"><span>→</span><input type="date" id="d2" value="${S.hasta}">
-    </div>`:''}
   </div>
+  <button class="custom ${S.periodo==='custom'?'on':''}" id="btncustom" aria-pressed="${S.periodo==='custom'}">
+    <span>📅 Fecha personalizada</span><span class="cv">${S.periodo==='custom'?'▲':'▼'}</span></button>
+  ${S.periodo==='custom'?`<div class="fechas">
+      <label>Desde<input type="date" id="d1" value="${S.desde}" max="${iso(hoy)}"></label>
+      <label>Hasta<input type="date" id="d2" value="${S.hasta}" max="${iso(hoy)}"></label>
+    </div>`:''}
 
   ${S.tab==='resumen'?`
   <div class="kpis">
@@ -438,9 +461,16 @@ function render(){
   $.querySelectorAll('.seg button[data-m]').forEach(b=>b.onclick=()=>{S.moneda=b.dataset.m;S.tope=15;render()});
   $.querySelectorAll('.tabs button').forEach(b=>b.onclick=()=>{S.tab=b.dataset.tab;S.tope=15;render()});
   $.querySelectorAll('.periodo button').forEach(b=>b.onclick=()=>{S.periodo=b.dataset.p;S.tope=15;render()});
+  document.getElementById('btncustom').onclick=()=>{
+    if(S.periodo==='custom'){S.periodo='mes';}
+    else{ S.periodo='custom';
+      if(!S.desde&&!S.hasta){ const d=new Date(hoy); d.setUTCDate(d.getUTCDate()-30);
+        S.desde=iso(d); S.hasta=iso(hoy); } }
+    S.tope=15; render();
+  };
   const d1=document.getElementById('d1'),d2=document.getElementById('d2');
-  if(d1)d1.onchange=()=>{S.desde=d1.value;render()};
-  if(d2)d2.onchange=()=>{S.hasta=d2.value;render()};
+  if(d1)d1.onchange=()=>{S.desde=d1.value; if(S.hasta&&S.desde>S.hasta)S.hasta=S.desde; render()};
+  if(d2)d2.onchange=()=>{S.hasta=d2.value; if(S.desde&&S.hasta<S.desde)S.desde=S.hasta; render()};
   $.querySelectorAll('.cat').forEach(el=>{
     const ir=()=>{S.cat=el.dataset.cat;S.tab='movs';S.tope=15;render();window.scrollTo({top:0,behavior:'smooth'})};
     el.onclick=ir; el.onkeydown=e=>{if(e.key==='Enter'||e.key===' '){e.preventDefault();ir()}};
