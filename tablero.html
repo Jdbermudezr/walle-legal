@@ -113,7 +113,8 @@ header{display:flex;align-items:center;gap:12px;margin-bottom:16px}
 .kpi .lbl{font-size:10.5px;font-weight:750;letter-spacing:1px;text-transform:uppercase;color:var(--ink3);
   display:flex;align-items:center;gap:6px}
 .dot{width:8px;height:8px;border-radius:3px;flex:none}
-.kpi .val{font-size:26px;font-weight:800;letter-spacing:-1px;margin-top:9px;font-variant-numeric:tabular-nums}
+.kpi .val{font-size:var(--vs,26px);font-weight:800;letter-spacing:-.8px;margin-top:9px;
+  font-variant-numeric:tabular-nums;white-space:nowrap;max-width:100%;overflow:hidden}
 .kpi .sub{font-size:12px;color:var(--ink3);margin-top:5px}
 button.kpi{display:block;width:100%;text-align:left;font:inherit;cursor:pointer;color:var(--ink)}
 .kpi .ver{margin-top:8px;font-size:11.5px;font-weight:700;color:var(--ink3)}
@@ -235,6 +236,8 @@ const $=document.getElementById('app');
 const T=new URLSearchParams(location.search).get('t');
 
 const esc=s=>String(s??'').replace(/[&<>"']/g,c=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[c]));
+// Cifras largas (millones) no caben a 26px en media tarjeta: se bajan por longitud.
+const talla=t=>{const n=String(t).length; return n<=10?26:n<=12?23:n<=14?20:n<=16?18:16;};
 const nf=(n,m)=>new Intl.NumberFormat('es-CO',{style:'currency',currency:m||'COP',maximumFractionDigits:0}).format(n);
 const corto=n=>{const a=Math.abs(n);
   if(a>=1e9)return (n/1e9).toFixed(1).replace('.0','')+'B';
@@ -452,11 +455,11 @@ function render(){
   ${S.tab==='resumen'?`
   <div class="kpis">
     <button class="kpi i" data-tipo="ingreso"><div class="lbl"><i class="dot" style="background:var(--in)"></i>Ingresos</div>
-      <div class="val pos">${nf(ing,S.moneda)}</div><div class="ver">Ver los ${nIng} →</div></button>
+      <div class="val pos" style="--vs:${talla(nf(ing,S.moneda))}px">${nf(ing,S.moneda)}</div><div class="ver">Ver los ${nIng} →</div></button>
     <button class="kpi g" data-tipo="egreso"><div class="lbl"><i class="dot" style="background:var(--out)"></i>Gastos</div>
-      <div class="val neg">${nf(egr,S.moneda)}</div><div class="ver">Ver los ${nEgr} →</div></button>
+      <div class="val neg" style="--vs:${talla(nf(egr,S.moneda))}px">${nf(egr,S.moneda)}</div><div class="ver">Ver los ${nEgr} →</div></button>
     <div class="kpi b wide"><div class="lbl">Balance</div>
-      <div class="val ${bal>=0?'pos':'neg'}">${bal>=0?'+':'−'}${nf(Math.abs(bal),S.moneda)}</div>
+      <div class="val ${bal>=0?'pos':'neg'}" style="--vs:${talla(nf(Math.abs(bal),S.moneda))+2}px">${bal>=0?'+':'−'}${nf(Math.abs(bal),S.moneda)}</div>
       <div class="sub">${ing>0?`Gastaste el ${Math.round(egr/ing*100)}% de lo que entró`:'Sin ingresos en el periodo'}</div></div>
   </div>
 
