@@ -183,6 +183,9 @@ g.grp.dim rect.bar{opacity:.35}
 .opt small{font-size:12px;font-weight:650;color:var(--ink3)}
 .opt[aria-pressed="true"]{background:var(--grad-brand);color:#fff;border-color:transparent}
 .opt[aria-pressed="true"] small{color:rgba(255,255,255,.85)}
+.hoja .listo{margin-top:10px;width:100%;border:0;border-radius:13px;background:var(--grad-brand);
+  color:#fff;font:inherit;font-size:15px;font-weight:750;padding:13px;cursor:pointer;
+  box-shadow:0 4px 14px rgba(27,122,70,.28)}
 .mv{border:1px solid var(--line);border-radius:15px;margin-bottom:9px;overflow:hidden;background:var(--surf);
   box-shadow:var(--sh-s)}
 .mv[open]{border-color:var(--line2)}
@@ -252,7 +255,7 @@ function pantalla(icono,titulo,texto,botones){
 }
 
 /* ================= estado ================= */
-const S={data:null,tab:'resumen',periodo:'mes',desde:'',hasta:'',moneda:'COP',cat:null,q:'',tope:15,tema:'light'};
+const S={data:null,tab:'resumen',periodo:'mes',desde:'',hasta:'',moneda:'COP',cats:[],q:'',tope:15,tema:'light'};
 try{const t=localStorage.getItem('walle_tema'); if(t)S.tema=t;}catch(e){}
 function aplicarTema(){
   document.documentElement.dataset.theme=S.tema;
@@ -286,7 +289,7 @@ function filtrados(conCat=true){
   const [a,b]=rango();
   return S.data.movimientos.filter(m=>
     m.moneda===S.moneda && (!a||m.fecha>=a) && m.fecha<=b &&
-    (!conCat||!S.cat||m.categoria===S.cat) &&
+    (!conCat||!S.cats.length||S.cats.includes(m.categoria)) &&
     (!S.q||(m.comercio+' '+m.descripcion+' '+m.categoria+' '+m.evento).toLowerCase().includes(S.q)));
 }
 
@@ -467,9 +470,10 @@ function render(){
   <div class="card">
     <input class="search" id="q" placeholder="Buscar comercio, categoría o evento…" value="${esc(S.q)}">
     <div class="filtros">
-      <button id="fTodas" aria-pressed="${!S.cat}">Todas</button>
-      <button class="abre" id="fCats" aria-pressed="${!!S.cat}">
-        <span>${S.cat?esc(S.cat):'Categorías'}</span><span class="cv">▾</span></button>
+      <button id="fTodas" aria-pressed="${!S.cats.length}">Todas</button>
+      <button class="abre" id="fCats" aria-pressed="${S.cats.length>0}">
+        <span>${S.cats.length===0?'Categorías':S.cats.length===1?esc(S.cats[0]):S.cats.length+' categorías'}</span>
+        <span class="cv">▾</span></button>
     </div>
     ${listaMovs(movs)}
   </div>`}
@@ -496,11 +500,11 @@ function render(){
   if(d1)d1.onchange=()=>{S.desde=d1.value; if(S.hasta&&S.desde>S.hasta)S.hasta=S.desde; render()};
   if(d2)d2.onchange=()=>{S.hasta=d2.value; if(S.desde&&S.hasta<S.desde)S.desde=S.hasta; render()};
   $.querySelectorAll('.cat').forEach(el=>{
-    const ir=()=>{S.cat=el.dataset.cat;S.tab='movs';S.tope=15;render();window.scrollTo({top:0,behavior:'smooth'})};
+    const ir=()=>{S.cats=[el.dataset.cat];S.tab='movs';S.tope=15;render();window.scrollTo({top:0,behavior:'smooth'})};
     el.onclick=ir; el.onkeydown=e=>{if(e.key==='Enter'||e.key===' '){e.preventDefault();ir()}};
   });
   const fT=document.getElementById('fTodas');
-  if(fT)fT.onclick=()=>{S.cat=null;S.tope=15;render()};
+  if(fT)fT.onclick=()=>{S.cats=[];S.tope=15;render()};
   const fC=document.getElementById('fCats');
   if(fC)fC.onclick=()=>abrirCategorias(sinCat);
   const more=document.getElementById('more'); if(more)more.onclick=()=>{S.tope+=25;render()};
@@ -521,17 +525,31 @@ function abrirCategorias(lista){
     <h3>Filtrar por categoría</h3>
     <p class="cap">Estas son las categorías que has usado en este periodo.</p>
     <div class="lista">
-      <button class="opt" data-c="" aria-pressed="${!S.cat}">
+      <button class="opt" data-c="" aria-pressed="${!S.cats.length}">
         <span>Todas</span><small>${lista.length}</small></button>
-      ${cats.map(c=>`<button class="opt" data-c="${esc(c)}" aria-pressed="${S.cat===c}">
+      ${cats.map(c=>`<button class="opt" data-c="${esc(c)}" aria-pressed="${S.cats.includes(c)}">
         <span>${esc(c)}</span><small>${cuenta.get(c)}</small></button>`).join('')}
     </div>
+    <button class="listo" id="listo">Listo</button>
   </div>`;
   const cerrar=()=>velo.remove();
-  velo.onclick=e=>{ if(e.target===velo) cerrar(); };
+  velo.onclick=e=>{ if(e.target===velo){ S.tope=15; cerrar(); render(); } };
+  const pinta=()=>{
+    velo.querySelectorAll('.opt').forEach(b=>{
+      const c=b.dataset.c;
+      b.setAttribute('aria-pressed', c? S.cats.includes(c) : !S.cats.length);
+    });
+    const et=velo.querySelector('#listo');
+    et.textContent = S.cats.length? `Ver ${S.cats.length} categoría${S.cats.length===1?'':'s'}` : 'Ver todas';
+  };
   velo.querySelectorAll('.opt').forEach(b=>b.onclick=()=>{
-    S.cat=b.dataset.c||null; S.tope=15; cerrar(); render();
+    const c=b.dataset.c;
+    if(!c){ S.cats=[]; }
+    else { const i=S.cats.indexOf(c); i<0? S.cats.push(c) : S.cats.splice(i,1); }
+    pinta();
   });
+  velo.querySelector('#listo').onclick=()=>{ S.tope=15; cerrar(); render(); };
+  pinta();
   document.addEventListener('keydown',function esc2(e){
     if(e.key==='Escape'){cerrar();document.removeEventListener('keydown',esc2)} });
   document.body.appendChild(velo);
