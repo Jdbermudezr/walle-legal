@@ -46,7 +46,7 @@ body{
 
 /* ============ header ============ */
 header{display:flex;align-items:center;gap:12px;margin-bottom:16px}
-.mark{width:46px;height:46px;border-radius:15px;background:var(--grad-brand);flex:none;
+.mark{width:46px;height:46px;border-radius:15px;background:var(--surf);border:1px solid var(--line);flex:none;
   display:grid;place-items:center;box-shadow:var(--sh-m),var(--sh-in);overflow:hidden}
 .mark img{width:100%;height:100%;object-fit:cover}
 .who{flex:1;min-width:0}
@@ -367,7 +367,7 @@ function render(){
 
   $.innerHTML=`
   <header>
-    <div class="mark"><img src="logo.png" alt="" onerror="this.parentNode.innerHTML=window.__cerdito"></div>
+    <div class="mark"><img src="logo.png.png" alt="Walle" onerror="if(this.dataset.f){this.parentNode.innerHTML=window.__cerdito}else{this.dataset.f=1;this.src='logo.png'}"></div>
     <div class="who"><div class="brand">Walle</div><h1>${nom?'Hola, '+esc(nom):'Mi tablero'}</h1></div>
     <button class="tbtn" id="tema" title="Cambiar tema">${S.tema==='dark'?'☀︎':'☾'}</button>
   </header>
