@@ -92,12 +92,13 @@ header{display:flex;align-items:center;gap:12px;margin-bottom:16px}
 .custom.on{background:var(--grad-brand);color:#fff;border-color:transparent;margin-bottom:9px;
   box-shadow:0 4px 14px rgba(27,122,70,.28)}
 .custom .cv{font-size:10px;opacity:.7}
-.fechas{display:grid;grid-template-columns:1fr 1fr;gap:10px;margin-bottom:16px;
+.fechas{display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:10px;margin-bottom:16px;
   background:var(--surf2);border:1px solid var(--line);border-radius:14px;padding:12px}
-.fechas label{display:flex;flex-direction:column;gap:5px;font-size:11px;font-weight:700;
+.fechas label{display:flex;flex-direction:column;gap:5px;min-width:0;font-size:11px;font-weight:700;
   letter-spacing:.6px;text-transform:uppercase;color:var(--ink3)}
 .fechas input{border:1px solid var(--line);background:var(--surf);color:var(--ink);border-radius:10px;
-  padding:10px;font:inherit;font-size:14px;width:100%}
+  padding:10px 8px;font:inherit;font-size:14px;width:100%;min-width:0;max-width:100%;
+  -webkit-appearance:none;appearance:none;text-align:center}
 .fechas input:focus{outline:none;border-color:var(--in)}
 
 /* ============ kpis ============ */
@@ -155,11 +156,33 @@ g.grp.dim rect.bar{opacity:.35}
   padding:12px 14px;font:inherit;font-size:14px;margin-bottom:11px;box-shadow:var(--sh-s)}
 .search::placeholder{color:var(--ink3)}
 .search:focus{outline:none;border-color:var(--in)}
-.chips{display:flex;gap:7px;overflow-x:auto;padding-bottom:4px;margin-bottom:12px;scrollbar-width:none}
-.chips::-webkit-scrollbar{display:none}
-.chips button{flex:none;border:1px solid var(--line);background:var(--surf);color:var(--ink2);font:inherit;
-  font-size:12.5px;font-weight:650;padding:7px 12px;border-radius:99px;cursor:pointer}
-.chips button[aria-pressed="true"]{background:var(--ink);color:var(--bg);border-color:var(--ink)}
+.filtros{display:flex;gap:8px;margin-bottom:12px}
+.filtros button{flex:1;border:1px solid var(--line);background:var(--surf);color:var(--ink2);font:inherit;
+  font-size:13px;font-weight:650;padding:10px 12px;border-radius:12px;cursor:pointer;
+  box-shadow:var(--sh-s);display:flex;align-items:center;justify-content:center;gap:6px;
+  white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+.filtros button[aria-pressed="true"]{background:var(--ink);color:var(--bg);border-color:var(--ink)}
+.filtros .abre{flex:1.6}
+.filtros .abre .cv{opacity:.6;font-size:11px}
+
+/* hoja de categorias */
+.velo{position:fixed;inset:0;background:rgba(0,0,0,.45);display:flex;align-items:flex-end;
+  justify-content:center;z-index:50;padding:0}
+.hoja{width:100%;max-width:760px;background:var(--bg);border-radius:20px 20px 0 0;
+  border:1px solid var(--line);border-bottom:0;box-shadow:var(--sh-m);
+  padding:8px 16px calc(env(safe-area-inset-bottom) + 18px);max-height:76dvh;
+  display:flex;flex-direction:column;animation:sube .22s ease-out}
+@keyframes sube{from{transform:translateY(22px);opacity:.4}to{transform:none;opacity:1}}
+.hoja .asa{width:38px;height:4px;border-radius:99px;background:var(--line2);margin:6px auto 12px}
+.hoja h3{font-size:16px;font-weight:800;letter-spacing:-.2px;margin-bottom:2px}
+.hoja .cap{margin-bottom:10px}
+.hoja .lista{overflow-y:auto;-webkit-overflow-scrolling:touch}
+.opt{width:100%;display:flex;align-items:center;justify-content:space-between;gap:10px;
+  border:1px solid var(--line);background:var(--surf);color:var(--ink);font:inherit;font-size:14.5px;
+  font-weight:650;padding:12px 14px;border-radius:13px;margin-bottom:7px;cursor:pointer;text-align:left}
+.opt small{font-size:12px;font-weight:650;color:var(--ink3)}
+.opt[aria-pressed="true"]{background:var(--grad-brand);color:#fff;border-color:transparent}
+.opt[aria-pressed="true"] small{color:rgba(255,255,255,.85)}
 .mv{border:1px solid var(--line);border-radius:15px;margin-bottom:9px;overflow:hidden;background:var(--surf);
   box-shadow:var(--sh-s)}
 .mv[open]{border-color:var(--line2)}
@@ -443,9 +466,10 @@ function render(){
   :`
   <div class="card">
     <input class="search" id="q" placeholder="Buscar comercio, categoría o evento…" value="${esc(S.q)}">
-    <div class="chips">
-      <button data-c="" aria-pressed="${!S.cat}">Todas</button>
-      ${cats.map(c=>`<button data-c="${esc(c)}" aria-pressed="${S.cat===c}">${esc(c)}</button>`).join('')}
+    <div class="filtros">
+      <button id="fTodas" aria-pressed="${!S.cat}">Todas</button>
+      <button class="abre" id="fCats" aria-pressed="${!!S.cat}">
+        <span>${S.cat?esc(S.cat):'Categorías'}</span><span class="cv">▾</span></button>
     </div>
     ${listaMovs(movs)}
   </div>`}
@@ -475,12 +499,42 @@ function render(){
     const ir=()=>{S.cat=el.dataset.cat;S.tab='movs';S.tope=15;render();window.scrollTo({top:0,behavior:'smooth'})};
     el.onclick=ir; el.onkeydown=e=>{if(e.key==='Enter'||e.key===' '){e.preventDefault();ir()}};
   });
-  $.querySelectorAll('.chips button').forEach(b=>b.onclick=()=>{S.cat=b.dataset.c||null;S.tope=15;render()});
+  const fT=document.getElementById('fTodas');
+  if(fT)fT.onclick=()=>{S.cat=null;S.tope=15;render()};
+  const fC=document.getElementById('fCats');
+  if(fC)fC.onclick=()=>abrirCategorias(sinCat);
   const more=document.getElementById('more'); if(more)more.onclick=()=>{S.tope+=25;render()};
   const q=document.getElementById('q');
   if(q)q.oninput=()=>{S.q=q.value.trim().toLowerCase();S.tope=15;render();
     const n=document.getElementById('q');if(n){n.focus();n.setSelectionRange(n.value.length,n.value.length)}};
   if(S.tab==='resumen')armarTooltip();
+}
+
+// Hoja de categorias: muestra TODAS las del periodo, incluidas las que el usuario invento.
+function abrirCategorias(lista){
+  const cuenta=new Map();
+  lista.forEach(m=>cuenta.set(m.categoria,(cuenta.get(m.categoria)||0)+1));
+  const cats=[...cuenta.keys()].sort((a,b)=>cuenta.get(b)-cuenta.get(a)||a.localeCompare(b,'es'));
+  const velo=document.createElement('div'); velo.className='velo';
+  velo.innerHTML=`<div class="hoja" role="dialog" aria-modal="true" aria-label="Filtrar por categoría">
+    <div class="asa"></div>
+    <h3>Filtrar por categoría</h3>
+    <p class="cap">Estas son las categorías que has usado en este periodo.</p>
+    <div class="lista">
+      <button class="opt" data-c="" aria-pressed="${!S.cat}">
+        <span>Todas</span><small>${lista.length}</small></button>
+      ${cats.map(c=>`<button class="opt" data-c="${esc(c)}" aria-pressed="${S.cat===c}">
+        <span>${esc(c)}</span><small>${cuenta.get(c)}</small></button>`).join('')}
+    </div>
+  </div>`;
+  const cerrar=()=>velo.remove();
+  velo.onclick=e=>{ if(e.target===velo) cerrar(); };
+  velo.querySelectorAll('.opt').forEach(b=>b.onclick=()=>{
+    S.cat=b.dataset.c||null; S.tope=15; cerrar(); render();
+  });
+  document.addEventListener('keydown',function esc2(e){
+    if(e.key==='Escape'){cerrar();document.removeEventListener('keydown',esc2)} });
+  document.body.appendChild(velo);
 }
 
 /* ================= arranque ================= */
