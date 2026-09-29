@@ -58,10 +58,10 @@ header{display:flex;align-items:center;gap:12px;margin-bottom:18px}
 .legend{display:flex;gap:14px;font-size:12px;color:var(--ink2);margin-bottom:10px}
 .legend span{display:flex;align-items:center;gap:6px}
 
-svg{display:block;width:100%;overflow:visible}
+svg.chart{display:block;width:100%;height:210px;overflow:visible}
 .gridline{stroke:var(--line);stroke-width:1}
-.axis{fill:var(--ink3);font-size:10.5px}
-.barlbl{fill:var(--ink2);font-size:10px;font-weight:600}
+.axis{fill:var(--ink3);font-size:11px}
+.barlbl{font-size:11px;font-weight:700}
 rect.bar{transition:opacity .15s}
 g.grp:hover rect.bar{opacity:.55}
 g.grp:hover rect.bar.on{opacity:1}
@@ -170,22 +170,27 @@ function chartMeses(movs){
   const keys=[...map.keys()].sort().slice(-6);
   if(!keys.length) return '<div class="empty">Sin movimientos en este periodo.</div>';
   const max=Math.max(...keys.map(k=>Math.max(map.get(k).in,map.get(k).out)))||1;
-  const W=100,H=46,pad=4,gw=(W-pad*2)/keys.length,bw=Math.min(9,gw/2.6);
+  // Lienzo en px reales: el texto no crece con el ancho de la pantalla.
+  const W=340,H=180,pad=22,base=138,alto=96;
+  const gw=(W-pad*2)/keys.length, bw=Math.min(30,gw/2.8), sep=3;
   let g='';
   keys.forEach((k,i)=>{
     const o=map.get(k), cx=pad+gw*i+gw/2;
-    const hi=Math.max(1.2,o.in/max*30), ho=Math.max(1.2,o.out/max*30);
-    const [yy,mm]=k.split('-');
+    const hi=Math.max(3,o.in/max*alto), ho=Math.max(3,o.out/max*alto);
+    const [yy,mm]=k.split('-'); const bal=o.in-o.out;
     g+=`<g class="grp">
       <title>${MES[+mm-1]} ${yy}\n↑ ingresos ${nf(o.in,S.moneda)}\n↓ gastos ${nf(o.out,S.moneda)}</title>
-      <rect class="bar on" x="${cx-bw-1}" y="${34-hi}" width="${bw}" height="${hi}" rx="1.6" fill="var(--in)"/>
-      <rect class="bar on" x="${cx+1}" y="${34-ho}" width="${bw}" height="${ho}" rx="1.6" fill="var(--out)"/>
-      <text class="axis" x="${cx}" y="39.5" text-anchor="middle">${MES[+mm-1]}</text>
-      <text class="barlbl" x="${cx}" y="${34-Math.max(hi,ho)-2}" text-anchor="middle">${corto(o.in-o.out)}</text>
+      <rect x="${cx-gw/2}" y="20" width="${gw}" height="${base-20}" fill="transparent"/>
+      <rect class="bar on" x="${cx-bw-sep/2}" y="${base-hi}" width="${bw}" height="${hi}" rx="4" fill="var(--in)"/>
+      <rect class="bar on" x="${cx+sep/2}" y="${base-ho}" width="${bw}" height="${ho}" rx="4" fill="var(--out)"/>
+      <text class="axis" x="${cx}" y="${base+15}" text-anchor="middle">${MES[+mm-1]}</text>
+      <text class="barlbl" x="${cx}" y="${base-Math.max(hi,ho)-7}" text-anchor="middle"
+        fill="${bal>=0?'var(--acc)':'#F0876A'}">${bal>=0?'+':'−'}${corto(Math.abs(bal))}</text>
     </g>`;
   });
-  return `<svg viewBox="0 0 ${W} ${H}" role="img" aria-label="Ingresos y gastos por mes">
-    <line class="gridline" x1="${pad}" y1="34" x2="${W-pad}" y2="34"/>${g}</svg>`;
+  return `<svg class="chart" viewBox="0 0 ${W} ${H}" preserveAspectRatio="xMidYMid meet"
+     role="img" aria-label="Ingresos y gastos por mes">
+    <line class="gridline" x1="${pad-6}" y1="${base}" x2="${W-pad+6}" y2="${base}"/>${g}</svg>`;
 }
 // Magnitud por categoría: un solo hue, intensidad proporcional (escala secuencial).
 function chartCategorias(movs){
