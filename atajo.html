@@ -4,21 +4,32 @@
 <meta charset="utf-8">
 <meta name="viewport" content="width=device-width,initial-scale=1">
 <title>Walle · Activar Apple Pay</title>
-<!-- Cambia SOLO esta linea cuando el atajo tenga un link nuevo de iCloud -->
-<script>var ATAJO = "https://www.icloud.com/shortcuts/4f4e256c529e4d7c8149ea28ee91159d";</script>
+<!-- Cambia el link en LAS DOS lineas de abajo cuando el atajo tenga uno nuevo -->
+<meta http-equiv="refresh" content="0;url=https://www.icloud.com/shortcuts/4f4e256c529e4d7c8149ea28ee91159d">
+<script>
+  var ATAJO = "https://www.icloud.com/shortcuts/4f4e256c529e4d7c8149ea28ee91159d";
+  location.replace(ATAJO);
+</script>
 <style>
-  :root{--bg:#0f1115;--fg:#f5f5f4;--mut:#a1a1aa;--acc:#facc15}
+  :root{
+    --bg:#ffffff; --fg:#111111; --mut:#6b7280;
+    --acc:#f5c518; --accfg:#111111; --soft:#9ca3af;
+  }
+  @media (prefers-color-scheme: dark){
+    :root{ --bg:#000000; --fg:#f5f5f5; --mut:#a1a1aa; --soft:#52525b; }
+  }
   *{box-sizing:border-box}
+  html,body{background:var(--bg)}
   body{margin:0;min-height:100svh;display:grid;place-items:center;padding:24px;
-       background:var(--bg);color:var(--fg);
+       color:var(--fg);
        font-family:-apple-system,BlinkMacSystemFont,"Segoe UI",Helvetica,Arial,sans-serif}
-  .c{max-width:380px;text-align:center}
-  .i{font-size:56px;line-height:1;margin-bottom:18px}
-  h1{font-size:22px;margin:0 0 10px;font-weight:700}
-  p{margin:0 0 26px;color:var(--mut);font-size:15px;line-height:1.5}
-  a.b{display:block;background:var(--acc);color:#111;text-decoration:none;
+  .c{max-width:380px;width:100%;text-align:center}
+  .i{font-size:52px;line-height:1;margin-bottom:16px}
+  h1{font-size:21px;margin:0 0 8px;font-weight:700}
+  p{margin:0 0 24px;color:var(--mut);font-size:15px;line-height:1.5}
+  a.b{display:block;background:var(--acc);color:var(--accfg);text-decoration:none;
       padding:15px 20px;border-radius:14px;font-weight:700;font-size:16px}
-  small{display:block;margin-top:20px;color:#52525b;font-size:12px}
+  small{display:block;margin-top:18px;color:var(--soft);font-size:12px}
 </style>
 </head>
 <body>
@@ -26,12 +37,8 @@
     <div class="i">⚡</div>
     <h1>Activar Apple Pay</h1>
     <p>Abriendo el atajo de Walle…<br>Si no abre solo, toca el botón.</p>
-    <a class="b" id="ir" href="#">Abrir atajo</a>
+    <a class="b" href="https://www.icloud.com/shortcuts/4f4e256c529e4d7c8149ea28ee91159d">Abrir atajo</a>
     <small>Requiere iPhone con iOS 26 o superior</small>
   </div>
-<script>
-  document.getElementById("ir").href = ATAJO;
-  location.replace(ATAJO);
-</script>
 </body>
 </html>
