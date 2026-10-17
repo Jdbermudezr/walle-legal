@@ -4,84 +4,49 @@
 <meta charset="utf-8">
 <meta name="viewport" content="width=device-width,initial-scale=1">
 <title>Walle · Activar Apple Pay</title>
-<!-- Cuando el atajo cambie, actualiza el link SOLO en esta linea -->
-<script>var ATAJO = "https://www.icloud.com/shortcuts/cb8437f8c6e04d7192bab1b8d9688357";</script>
+<!-- Link del atajo: actualizar SOLO esta linea -->
+<script>var ATAJO="https://www.icloud.com/shortcuts/cb8437f8c6e04d7192bab1b8d9688357";</script>
 <style>
-  :root{
-    --bg:#ffffff; --card:#f6f6f7; --line:#e5e5e7;
-    --fg:#111113; --mut:#6b7280; --soft:#9ca3af;
-    --acc:#f5c518; --accfg:#111113;
-  }
-  @media (prefers-color-scheme: dark){
-    :root{ --bg:#000000; --card:#121214; --line:#26262a;
-           --fg:#f5f5f5; --mut:#a1a1aa; --soft:#52525b; }
+  :root{--bg:#fff;--fg:#111;--mut:#71717a;--line:#e7e7ea;--acc:#f5c518}
+  @media(prefers-color-scheme:dark){
+    :root{--bg:#000;--fg:#f7f7f7;--mut:#8f8f98;--line:#232327}
   }
   *{box-sizing:border-box}
   html,body{background:var(--bg)}
   body{margin:0;min-height:100svh;display:flex;align-items:center;justify-content:center;
-       padding:28px 20px;color:var(--fg);
+       padding:32px 22px;color:var(--fg);
        font-family:-apple-system,BlinkMacSystemFont,"Segoe UI",Helvetica,Arial,sans-serif;
        -webkit-font-smoothing:antialiased}
-  .wrap{width:100%;max-width:400px}
-  header{text-align:center;margin-bottom:26px}
-  .bolt{font-size:46px;line-height:1}
-  h1{font-size:23px;margin:10px 0 6px;font-weight:700;letter-spacing:-.01em}
-  .sub{margin:0;color:var(--mut);font-size:15px;line-height:1.45}
-  ol{list-style:none;margin:0;padding:0}
-  li{display:flex;gap:14px;background:var(--card);border:1px solid var(--line);
-     border-radius:16px;padding:16px;margin-bottom:12px}
-  .n{flex:0 0 26px;height:26px;border-radius:50%;background:var(--acc);color:var(--accfg);
-     font-weight:700;font-size:14px;display:grid;place-items:center}
-  .t{flex:1;min-width:0}
-  .t b{display:block;font-size:15px;margin-bottom:4px}
-  .t span{display:block;color:var(--mut);font-size:14px;line-height:1.45}
-  a.b{display:block;margin-top:12px;background:var(--acc);color:var(--accfg);
-      text-decoration:none;padding:14px;border-radius:12px;font-weight:700;
-      font-size:16px;text-align:center}
-  .kb{display:inline-block;background:var(--bg);border:1px solid var(--line);
-      border-radius:6px;padding:1px 7px;font-weight:600;color:var(--fg);font-size:13px}
-  footer{margin-top:22px;text-align:center;color:var(--soft);font-size:12px;line-height:1.5}
+  .w{width:100%;max-width:360px;text-align:center}
+  .b{font-size:44px;line-height:1}
+  h1{font-size:25px;font-weight:700;letter-spacing:-.02em;margin:12px 0 8px}
+  .s{color:var(--mut);font-size:15px;line-height:1.45;margin:0 0 28px}
+  a.cta{display:block;background:var(--acc);color:#111;text-decoration:none;
+        padding:17px;border-radius:14px;font-weight:700;font-size:17px}
+  ol{list-style:none;margin:30px 0 0;padding:0;text-align:left}
+  li{display:flex;gap:13px;align-items:flex-start;padding:15px 2px;border-top:1px solid var(--line)}
+  .n{flex:0 0 24px;height:24px;border-radius:50%;border:1.5px solid var(--acc);
+     color:var(--fg);font-weight:700;font-size:13px;display:grid;place-items:center}
+  p{margin:0;font-size:15px;line-height:1.45}
+  p b{font-weight:700}
+  footer{margin-top:26px;color:var(--mut);font-size:12.5px;line-height:1.5}
 </style>
 </head>
 <body>
-<div class="wrap">
-  <header>
-    <div class="bolt">⚡</div>
-    <h1>Activar Apple Pay</h1>
-    <p class="sub">Para que Walle registre tus compras solo,<br>sin que escribas nada.</p>
-  </header>
+<div class="w">
+  <div class="b">⚡</div>
+  <h1>Activar Apple Pay</h1>
+  <p class="s">Walle registra tus compras solo.</p>
+
+  <a class="cta" id="ir" href="#">Instalar atajo</a>
 
   <ol>
-    <li>
-      <div class="n">1</div>
-      <div class="t">
-        <b>Instala el atajo</b>
-        <span>Toca el botón y luego <span class="kb">Obtener atajo</span>. Te va a pedir tu número de WhatsApp: escribe el mismo con el que le hablas a Walle.</span>
-        <a class="b" id="ir" href="#">Instalar atajo</a>
-      </div>
-    </li>
-    <li>
-      <div class="n">2</div>
-      <div class="t">
-        <b>Ábrelo una vez y toca Permitir</b>
-        <span>Busca el atajo <b>Walle</b> en la app Atajos y tócalo. Te va a pedir permiso para conectarse: elige <span class="kb">Permitir siempre</span>.</span>
-      </div>
-    </li>
-    <li>
-      <div class="n">3</div>
-      <div class="t">
-        <b>Ya está</b>
-        <span>No vuelvas a abrirlo nunca. La próxima vez que pagues acercando el iPhone, el gasto llega solo a tu hoja.</span>
-      </div>
-    </li>
+    <li><div class="n">1</div><p>Escribe tu <b>número de WhatsApp</b></p></li>
+    <li><div class="n">2</div><p>Abre el atajo <b>Walle</b> y toca <b>Permitir siempre</b></p></li>
   </ol>
 
-  <footer>
-    El paso 2 es obligatorio.<br>
-    Sin ese permiso el atajo no puede avisarle a Walle.<br><br>
-    Requiere iPhone con iOS 26 o superior.
-  </footer>
+  <footer>Listo. Paga acercando el iPhone.</footer>
 </div>
-<script>document.getElementById("ir").href = ATAJO;</script>
+<script>document.getElementById("ir").href=ATAJO;</script>
 </body>
 </html>
