@@ -1,13 +1,1 @@
-{
-  "cleanUrls": true,
-  "rewrites": [
-    {
-      "source": "/activar",
-      "destination": "https://fnolzmacqnaxcktlxhxx.supabase.co/functions/v1/google-oauth-start"
-    },
-    {
-      "source": "/oauth/callback",
-      "destination": "https://fnolzmacqnaxcktlxhxx.supabase.co/functions/v1/google-oauth-callback"
-    }
-  ]
-}
+{"cleanUrls": true, "headers": [{"source": "/atajo", "headers": [{"key": "Cache-Control", "value": "no-store, must-revalidate"}]}], "rewrites": [{"source": "/activar", "destination": "https://fnolzmacqnaxcktlxhxx.supabase.co/functions/v1/google-oauth-start"}, {"source": "/oauth/callback", "destination": "https://fnolzmacqnaxcktlxhxx.supabase.co/functions/v1/google-oauth-callback"}]}
