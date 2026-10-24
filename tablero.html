@@ -236,10 +236,8 @@ g.grp.dim rect.bar{opacity:.35}
 #cal .dc.sel{background:var(--brand);color:#fff}
 #cal .dc u{position:absolute;bottom:5px;display:flex;gap:3px;text-decoration:none}
 #cal .dc u i{width:5px;height:5px;border-radius:50%}
-#cal .dc i.r{background:#FFC700}
 #cal .dc i.g{background:var(--in)}
 #cal .dc i.e{background:#E0604F}
-#cal .dc i.h{opacity:.35}
 #cal .dc.sel u i{box-shadow:0 0 0 1px #fff}
 #cal .it{display:flex;align-items:center;gap:10px;padding:12px 0;border-top:1px solid var(--line)}
 #cal .it:first-of-type{border-top:0}
@@ -261,18 +259,25 @@ g.grp.dim rect.bar{opacity:.35}
 #cal .lg{display:flex;gap:14px;justify-content:center;font-size:11.5px;color:var(--ink3);margin:-6px 0 16px}
 #cal .lg span::before{content:"";display:inline-block;width:7px;height:7px;border-radius:50%;margin-right:5px;background:var(--c)}
 #cal .sub{font-size:11.5px;font-weight:750;letter-spacing:.4px;text-transform:uppercase;color:var(--ink3);margin:14px 0 2px}
-#cal .tot{display:flex;gap:16px;font-size:13px;font-weight:700;margin-bottom:2px}
-#cal .mr{display:flex;align-items:center;gap:10px;padding:10px 0;border-top:1px solid var(--line)}
-#cal .mi{width:8px;height:8px;border-radius:50%;flex:none}
-#cal .mi.g,#cal .tot .g{background:var(--in)}
-#cal .mi.e,#cal .tot .e{background:#E0604F}
-#cal .tot .g,#cal .tot .e{background:none}
-#cal .tot .g{color:var(--in)}
-#cal .tot .e{color:#E0604F}
-#cal .mo{font-size:14px;font-weight:750;white-space:nowrap}
-#cal .mo.g{color:var(--in)}
-#cal .mo.e{color:#E0604F}
-#cal .ver{width:100%;border:0;background:var(--bg2);color:var(--ink);font:inherit;font-weight:750;font-size:14.5px;padding:13px;border-radius:14px;cursor:pointer;margin-top:12px}
+#cal .ver{width:100%;border:0;background:var(--brand);color:#fff;font:inherit;font-weight:750;font-size:14.5px;padding:14px;border-radius:14px;cursor:pointer;margin:4px 0 8px}
+#cal .dc.rc{background:#FFE680;color:#5A4500;border-color:#F2C94C}
+#cal .dc.rc.rh{background:#FFF3C4;border-color:#F2E3A0}
+#cal .dc.rc.sel{background:var(--brand);color:#fff;border-color:var(--brand)}
+#cal .lg .q::before{border-radius:3px;width:9px;height:9px;box-shadow:0 0 0 1px #F2C94C}
+#cal .cv{position:fixed;inset:0;background:rgba(10,14,12,.42);z-index:60;animation:cvf .18s ease both}
+#cal .cs{position:fixed;left:0;right:0;bottom:0;max-width:760px;margin:0 auto;max-height:80vh;overflow-y:auto;background:var(--surf);border-radius:24px 24px 0 0;padding:10px 20px calc(24px + env(safe-area-inset-bottom));z-index:61;box-shadow:0 -12px 40px rgba(0,0,0,.22);animation:csu .24s cubic-bezier(.2,.8,.2,1) both}
+#cal .cg{width:40px;height:4px;border-radius:2px;background:var(--line2);margin:0 auto 14px}
+#cal .cs h2{font-size:19px;font-weight:750;letter-spacing:-.3px}
+#cal .cs .cap{font-size:12px;color:var(--ink3);margin:3px 0 14px}
+#cal .cs .card{background:none;border:0;box-shadow:none;padding:0;margin:0}
+#cal .st{display:grid;grid-template-columns:1fr 1fr;gap:10px;margin-bottom:12px}
+#cal .sx{background:var(--bg2);border-radius:14px;padding:12px 14px}
+#cal .sx small{display:block;font-size:11.5px;font-weight:700;color:var(--ink3);margin-bottom:3px}
+#cal .sx b{font-size:17px;font-weight:750;letter-spacing:-.3px}
+#cal .sx b.g{color:var(--in)}
+#cal .sx b.e{color:#E0604F}
+@keyframes cvf{from{opacity:0}to{opacity:1}}
+@keyframes csu{from{transform:translateY(40px);opacity:0}to{transform:none;opacity:1}}
 </style>
 </head>
 <body data-palette="#1B7A46,#D9A13B">
@@ -677,9 +682,9 @@ async function calCargar(){
   if(r.ok){C.items=r.items||[];C.ok=true;C.msg='';}else{C.msg=r.mensaje||'No pudimos cargar tus recordatorios.';}
   render();
 }
-function filaHTML(it){
+function filaHTML(it,conFecha){
   const hecho=it.estado==='hecho';
-  const nota=it.estado==='enviado'?'<small>Aviso enviado</small>':'';
+  const nota=conFecha?'<small>'+fechaLarga(it.fecha)+'</small>':(it.estado==='enviado'?'<small>Aviso enviado</small>':'');
   const borrar=C.conf===it.id?'<button class="ic w" data-a="borrar" data-id="'+it.id+'">¿Borrar?</button>':'<button class="ic" data-a="pedirborrar" data-id="'+it.id+'" aria-label="Borrar">🗑</button>';
   return '<div class="it'+(hecho?' h':'')+'"><span class="hr">'+hora12(it.hora)+'</span><span class="tt">'+esc(it.titulo)+nota+'</span>'
     +(hecho?'':'<button class="ic" data-a="hecho" data-id="'+it.id+'" aria-label="Marcar como hecho">✓</button><button class="ic" data-a="editar" data-id="'+it.id+'" aria-label="Editar">✎</button>')
@@ -696,16 +701,15 @@ function formHTML(){
 const calMonto=v=>(S.moneda==='COP'?'$':S.moneda+' ')+Math.round(Number(v)||0).toLocaleString('es-CO');
 function puntos(L,M){
   const a=[];
-  if(L.length)a.push('<i class="r'+(L.some(i=>i.estado!=='hecho')?'':' h')+'"></i>');
   if(M.some(m=>m.tipo==='ingreso'))a.push('<i class="g"></i>');
   if(M.some(m=>m.tipo==='egreso'))a.push('<i class="e"></i>');
   return a.length?'<u>'+a.join('')+'</u>':'';
 }
-function movsDiaHTML(M){
-  if(!M.length)return '<div class="sub">Movimientos</div><div class="vacio">Sin movimientos este día.</div>';
+function diaHTML(f,L,M){
   let ing=0,egr=0;M.forEach(m=>{if(m.tipo==='ingreso')ing+=Number(m.valor)||0;else egr+=Number(m.valor)||0;});
-  return '<div class="sub">Movimientos</div><div class="tot">'+(ing?'<span class="g">+ '+calMonto(ing)+'</span>':'')+(egr?'<span class="e">− '+calMonto(egr)+'</span>':'')+'</div>'
-    +M.map(m=>{const g=m.tipo==='ingreso';return '<div class="mr"><span class="mi '+(g?'g':'e')+'"></span><span class="tt">'+esc(m.comercio||m.categoria||'Movimiento')+'<small>'+esc(m.categoria||'')+'</small></span><b class="mo '+(g?'g':'e')+'">'+(g?'+':'−')+calMonto(m.valor)+'</b></div>';}).join('');
+  let h='<h2>'+fechaLarga(f)+'</h2><div class="cap">'+(M.length?M.length+' movimiento'+(M.length===1?'':'s'):'Sin movimientos')+'</div>';
+  if(M.length)h+='<div class="st"><div class="sx"><small>Ingresos</small><b class="g">'+calMonto(ing)+'</b></div><div class="sx"><small>Egresos</small><b class="e">'+calMonto(egr)+'</b></div></div><button class="ver" data-a="vermov">Ver movimientos →</button>';
+  return h+'<div class="sub">Recordatorios</div>'+(L.length?L.map(i=>filaHTML(i)).join(''):'<div class="vacio">Nada para este día.</div>')+'<button class="nuevo" data-a="nuevo">+ Nuevo recordatorio</button>';
 }
 function calHTML(){
   const hoy=ymd(bog());
@@ -721,21 +725,16 @@ function calHTML(){
   for(let d=1;d<=n;d++){
     const f=y+'-'+pad2(m+1)+'-'+pad2(d), L=porDia[f]||[];
     const pend=L.some(i=>i.estado!=='hecho');
-    g+='<button class="dc'+(f===hoy?' hoy':'')+(f===C.sel?' sel':'')+'" data-a="dia" data-f="'+f+'">'+d+puntos(L,mv[f]||[])+'</button>';
+    g+='<button class="dc'+(L.length?(pend?' rc':' rc rh'):'')+(f===hoy?' hoy':'')+(f===C.sel?' sel':'')+'" data-a="dia" data-f="'+f+'">'+d+puntos(L,mv[f]||[])+'</button>';
   }
-  g+='</div><div class="lg"><span style="--c:#FFC700">Recordatorio</span><span style="--c:var(--in)">Ingreso</span><span style="--c:#E0604F">Egreso</span></div>';
+  g+='</div><div class="lg"><span class="q" style="--c:#FFE680">Recordatorio</span><span style="--c:var(--in)">Ingreso</span><span style="--c:#E0604F">Egreso</span></div>';
   let h='<div id="cal"><div class="ch"><button class="nv" data-a="prev" aria-label="Mes anterior">‹</button><b>'+MESES[m]+' '+y+'</b><button class="nv" data-a="next" aria-label="Mes siguiente">›</button></div>'+g;
   if(C.msg)h+='<div class="err">'+esc(C.msg)+'</div>';
-  if(C.form){h+=formHTML();}
-  else{
-    let titulo,lista;
-    if(C.sel){titulo=fechaLarga(C.sel);lista=porDia[C.sel]||[];}
-    else{titulo='Próximos';lista=vivos.filter(i=>i.estado!=='hecho'&&(i.fecha+'T'+i.hora)>=(hoy+'T00:00')).slice(0,6);}
-    h+='<div class="card"><h2>'+titulo+'</h2><div class="cap">'+(C.sel?'Resumen del día':(C.cargando&&!C.ok?'Cargando…':lista.length+' recordatorio'+(lista.length===1?'':'s')))+'</div>'
-      +(C.sel?movsDiaHTML(mv[C.sel]||[])+'<div class="sub">Recordatorios</div>':'')
-      +(lista.length?lista.map(filaHTML).join(''):'<div class="vacio">'+(C.sel?'Nada para este día.':'No tienes recordatorios próximos.')+'</div>')
-      +'<button class="nuevo" data-a="nuevo">+ Nuevo recordatorio</button>'+(C.sel&&(mv[C.sel]||[]).length?'<button class="ver" data-a="vermov">Ver en Movimientos →</button>':'')+'</div>';
-  }
+  const prox=vivos.filter(i=>i.estado!=='hecho'&&(i.fecha+'T'+i.hora)>=(hoy+'T00:00')).slice(0,6);
+  h+='<div class="card"><h2>Próximos</h2><div class="cap">'+(C.cargando&&!C.ok?'Cargando…':prox.length+' recordatorio'+(prox.length===1?'':'s'))+'</div>'
+    +(prox.length?prox.map(i=>filaHTML(i,true)).join(''):'<div class="vacio">No tienes recordatorios próximos.</div>')
+    +'<button class="nuevo" data-a="nuevo">+ Nuevo recordatorio</button></div>';
+  if(C.form||C.sel)h+='<div class="cv" data-a="cerrar"></div><div class="cs"><div class="cg"></div>'+(C.form?formHTML():diaHTML(C.sel,porDia[C.sel]||[],mv[C.sel]||[]))+'</div>';
   return h+'</div>';
 }
 function calEventos(p){
@@ -743,8 +742,9 @@ function calEventos(p){
     const b=e.target.closest('[data-a]');if(!b)return;
     const a=b.dataset.a,id=b.dataset.id;
     if(a==='prev'||a==='next'){let [y,m]=C.mes;m+=a==='next'?1:-1;if(m<0){m=11;y--;}if(m>11){m=0;y++;}C.mes=[y,m];C.sel=null;C.conf=null;return render();}
-    if(a==='dia'){C.sel=C.sel===b.dataset.f?null:b.dataset.f;C.conf=null;return render();}
-    if(a==='vermov'&&C.sel){S.tab='movs';S.periodo='custom';S.desde=C.sel;S.hasta=C.sel;S.tope=15;return render();}
+    if(a==='dia'){C.sel=b.dataset.f;C.conf=null;return render();}
+    if(a==='vermov'&&C.sel){S.tab='movs';S.periodo='custom';S.desde=C.sel;S.hasta=C.sel;C.sel=null;S.tope=15;return render();}
+    if(a==='cerrar'){if(C.form)C.form=null;else{C.sel=null;C.conf=null;}return render();}
     if(a==='nuevo'){C.form={id:'',titulo:'',fecha:C.sel||ymd(bog()),hora:'09:00',err:''};return render();}
     if(a==='editar'){const it=C.items.find(i=>i.id===id);if(!it)return;C.form={id:it.id,titulo:it.titulo,fecha:it.fecha,hora:it.hora,err:''};return render();}
     if(a==='cancelar'){C.form=null;return render();}
