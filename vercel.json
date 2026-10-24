@@ -1,1 +1,40 @@
-{"cleanUrls": true, "headers": [{"source": "/(atajo|applepay|gmail)", "headers": [{"key": "Cache-Control", "value": "no-store, must-revalidate"}]}, {"source": "/(.*).shortcut", "headers": [{"key": "Cache-Control", "value": "no-store, must-revalidate"}]}], "redirects": [{"source": "/atajo", "destination": "/Walle.shortcut", "permanent": false}, {"source": "/applepay", "destination": "/Walle.shortcut", "permanent": false}, {"source": "/gmail", "destination": "/Walle-Gmail.shortcut", "permanent": false}], "rewrites": [{"source": "/activar", "destination": "https://fnolzmacqnaxcktlxhxx.supabase.co/functions/v1/google-oauth-start"}, {"source": "/oauth/callback", "destination": "https://fnolzmacqnaxcktlxhxx.supabase.co/functions/v1/google-oauth-callback"}]}
+{
+  "cleanUrls": true,
+  "headers": [
+    {
+      "source": "/(atajo|applepay|gmail)",
+      "headers": [
+        {
+          "key": "Cache-Control",
+          "value": "no-store, must-revalidate"
+        }
+      ]
+    },
+    {
+      "source": "/(.*).shortcut",
+      "headers": [
+        {
+          "key": "Cache-Control",
+          "value": "no-store, must-revalidate"
+        }
+      ]
+    }
+  ],
+  "redirects": [
+    {
+      "source": "/atajo",
+      "destination": "/applepay",
+      "permanent": false
+    }
+  ],
+  "rewrites": [
+    {
+      "source": "/activar",
+      "destination": "https://fnolzmacqnaxcktlxhxx.supabase.co/functions/v1/google-oauth-start"
+    },
+    {
+      "source": "/oauth/callback",
+      "destination": "https://fnolzmacqnaxcktlxhxx.supabase.co/functions/v1/google-oauth-callback"
+    }
+  ]
+}
