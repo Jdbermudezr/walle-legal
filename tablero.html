@@ -234,12 +234,16 @@ g.grp.dim rect.bar{opacity:.35}
 #cal .dc.v{background:transparent;box-shadow:none;cursor:default}
 #cal .dc.hoy{border-color:var(--brand)}
 #cal .dc.sel{background:var(--brand);color:#fff}
-#cal .dc i{position:absolute;bottom:6px;width:5px;height:5px;border-radius:50%;background:var(--gold)}
-#cal .dc i.h{background:var(--ink3);opacity:.6}
-#cal .dc.sel i{background:#fff;opacity:1}
+#cal .dc u{position:absolute;bottom:5px;display:flex;gap:3px;text-decoration:none}
+#cal .dc u i{width:5px;height:5px;border-radius:50%}
+#cal .dc i.r{background:#FFC700}
+#cal .dc i.g{background:var(--in)}
+#cal .dc i.e{background:#E0604F}
+#cal .dc i.h{opacity:.35}
+#cal .dc.sel u i{box-shadow:0 0 0 1px #fff}
 #cal .it{display:flex;align-items:center;gap:10px;padding:12px 0;border-top:1px solid var(--line)}
 #cal .it:first-of-type{border-top:0}
-#cal .hr{min-width:70px;font-size:12.5px;font-weight:750;color:var(--brand)}
+#cal .hr{min-width:66px;text-align:center;font-size:12px;font-weight:750;background:#FFE680;color:#5A4500;padding:4px 8px;border-radius:8px}
 #cal .tt{flex:1;font-size:14.5px;font-weight:600;min-width:0;overflow-wrap:anywhere}
 #cal .tt small{display:block;font-size:11.5px;font-weight:600;color:var(--ink3);margin-top:2px}
 #cal .it.h .tt{text-decoration:line-through;color:var(--ink3)}
@@ -254,6 +258,21 @@ g.grp.dim rect.bar{opacity:.35}
 #cal .pri{background:var(--brand);color:#fff}
 #cal .sec{background:var(--bg2);color:var(--ink2)}
 #cal .err{color:#B3261E;font-size:13px;margin-bottom:8px}
+#cal .lg{display:flex;gap:14px;justify-content:center;font-size:11.5px;color:var(--ink3);margin:-6px 0 16px}
+#cal .lg span::before{content:"";display:inline-block;width:7px;height:7px;border-radius:50%;margin-right:5px;background:var(--c)}
+#cal .sub{font-size:11.5px;font-weight:750;letter-spacing:.4px;text-transform:uppercase;color:var(--ink3);margin:14px 0 2px}
+#cal .tot{display:flex;gap:16px;font-size:13px;font-weight:700;margin-bottom:2px}
+#cal .mr{display:flex;align-items:center;gap:10px;padding:10px 0;border-top:1px solid var(--line)}
+#cal .mi{width:8px;height:8px;border-radius:50%;flex:none}
+#cal .mi.g,#cal .tot .g{background:var(--in)}
+#cal .mi.e,#cal .tot .e{background:#E0604F}
+#cal .tot .g,#cal .tot .e{background:none}
+#cal .tot .g{color:var(--in)}
+#cal .tot .e{color:#E0604F}
+#cal .mo{font-size:14px;font-weight:750;white-space:nowrap}
+#cal .mo.g{color:var(--in)}
+#cal .mo.e{color:#E0604F}
+#cal .ver{width:100%;border:0;background:var(--bg2);color:var(--ink);font:inherit;font-weight:750;font-size:14.5px;padding:13px;border-radius:14px;cursor:pointer;margin-top:12px}
 </style>
 </head>
 <body data-palette="#1B7A46,#D9A13B">
@@ -674,12 +693,27 @@ function formHTML(){
    +'<div class="fr"><input class="fi" id="f-f" type="date" min="'+ymd(bog())+'" value="'+esc(f.fecha)+'"><input class="fi" id="f-h" type="time" value="'+esc(f.hora)+'"></div>'
    +'<div class="fb"><button class="sec" data-a="cancelar">Cancelar</button><button class="pri" data-a="guardar">Guardar</button></div></div>';
 }
+const calMonto=v=>(S.moneda==='COP'?'$':S.moneda+' ')+Math.round(Number(v)||0).toLocaleString('es-CO');
+function puntos(L,M){
+  const a=[];
+  if(L.length)a.push('<i class="r'+(L.some(i=>i.estado!=='hecho')?'':' h')+'"></i>');
+  if(M.some(m=>m.tipo==='ingreso'))a.push('<i class="g"></i>');
+  if(M.some(m=>m.tipo==='egreso'))a.push('<i class="e"></i>');
+  return a.length?'<u>'+a.join('')+'</u>':'';
+}
+function movsDiaHTML(M){
+  if(!M.length)return '<div class="sub">Movimientos</div><div class="vacio">Sin movimientos este día.</div>';
+  let ing=0,egr=0;M.forEach(m=>{if(m.tipo==='ingreso')ing+=Number(m.valor)||0;else egr+=Number(m.valor)||0;});
+  return '<div class="sub">Movimientos</div><div class="tot">'+(ing?'<span class="g">+ '+calMonto(ing)+'</span>':'')+(egr?'<span class="e">− '+calMonto(egr)+'</span>':'')+'</div>'
+    +M.map(m=>{const g=m.tipo==='ingreso';return '<div class="mr"><span class="mi '+(g?'g':'e')+'"></span><span class="tt">'+esc(m.comercio||m.categoria||'Movimiento')+'<small>'+esc(m.categoria||'')+'</small></span><b class="mo '+(g?'g':'e')+'">'+(g?'+':'−')+calMonto(m.valor)+'</b></div>';}).join('');
+}
 function calHTML(){
   const hoy=ymd(bog());
   if(!C.mes){const b=bog();C.mes=[b.getUTCFullYear(),b.getUTCMonth()];}
   const [y,m]=C.mes;
   const vivos=C.items.filter(i=>i.estado!=='cancelado');
   const porDia={};vivos.forEach(i=>{(porDia[i.fecha]=porDia[i.fecha]||[]).push(i);});
+  const mv={};((S.data&&S.data.movimientos)||[]).forEach(m=>{if(m.moneda!==S.moneda)return;const f=String(m.fecha).slice(0,10);(mv[f]=mv[f]||[]).push(m);});
   const lead=(new Date(Date.UTC(y,m,1)).getUTCDay()+6)%7;
   const n=new Date(Date.UTC(y,m+1,0)).getUTCDate();
   let g='<div class="gr">'+['L','M','M','J','V','S','D'].map(d=>'<div class="dw">'+d+'</div>').join('');
@@ -687,9 +721,9 @@ function calHTML(){
   for(let d=1;d<=n;d++){
     const f=y+'-'+pad2(m+1)+'-'+pad2(d), L=porDia[f]||[];
     const pend=L.some(i=>i.estado!=='hecho');
-    g+='<button class="dc'+(f===hoy?' hoy':'')+(f===C.sel?' sel':'')+'" data-a="dia" data-f="'+f+'">'+d+(L.length?'<i class="'+(pend?'':'h')+'"></i>':'')+'</button>';
+    g+='<button class="dc'+(f===hoy?' hoy':'')+(f===C.sel?' sel':'')+'" data-a="dia" data-f="'+f+'">'+d+puntos(L,mv[f]||[])+'</button>';
   }
-  g+='</div>';
+  g+='</div><div class="lg"><span style="--c:#FFC700">Recordatorio</span><span style="--c:var(--in)">Ingreso</span><span style="--c:#E0604F">Egreso</span></div>';
   let h='<div id="cal"><div class="ch"><button class="nv" data-a="prev" aria-label="Mes anterior">‹</button><b>'+MESES[m]+' '+y+'</b><button class="nv" data-a="next" aria-label="Mes siguiente">›</button></div>'+g;
   if(C.msg)h+='<div class="err">'+esc(C.msg)+'</div>';
   if(C.form){h+=formHTML();}
@@ -697,9 +731,10 @@ function calHTML(){
     let titulo,lista;
     if(C.sel){titulo=fechaLarga(C.sel);lista=porDia[C.sel]||[];}
     else{titulo='Próximos';lista=vivos.filter(i=>i.estado!=='hecho'&&(i.fecha+'T'+i.hora)>=(hoy+'T00:00')).slice(0,6);}
-    h+='<div class="card"><h2>'+titulo+'</h2><div class="cap">'+(C.cargando&&!C.ok?'Cargando…':lista.length+' recordatorio'+(lista.length===1?'':'s'))+'</div>'
+    h+='<div class="card"><h2>'+titulo+'</h2><div class="cap">'+(C.sel?'Resumen del día':(C.cargando&&!C.ok?'Cargando…':lista.length+' recordatorio'+(lista.length===1?'':'s')))+'</div>'
+      +(C.sel?movsDiaHTML(mv[C.sel]||[])+'<div class="sub">Recordatorios</div>':'')
       +(lista.length?lista.map(filaHTML).join(''):'<div class="vacio">'+(C.sel?'Nada para este día.':'No tienes recordatorios próximos.')+'</div>')
-      +'<button class="nuevo" data-a="nuevo">+ Nuevo recordatorio</button></div>';
+      +'<button class="nuevo" data-a="nuevo">+ Nuevo recordatorio</button>'+(C.sel&&(mv[C.sel]||[]).length?'<button class="ver" data-a="vermov">Ver en Movimientos →</button>':'')+'</div>';
   }
   return h+'</div>';
 }
@@ -709,6 +744,7 @@ function calEventos(p){
     const a=b.dataset.a,id=b.dataset.id;
     if(a==='prev'||a==='next'){let [y,m]=C.mes;m+=a==='next'?1:-1;if(m<0){m=11;y--;}if(m>11){m=0;y++;}C.mes=[y,m];C.sel=null;C.conf=null;return render();}
     if(a==='dia'){C.sel=C.sel===b.dataset.f?null:b.dataset.f;C.conf=null;return render();}
+    if(a==='vermov'&&C.sel){S.tab='movs';S.periodo='custom';S.desde=C.sel;S.hasta=C.sel;S.tope=15;return render();}
     if(a==='nuevo'){C.form={id:'',titulo:'',fecha:C.sel||ymd(bog()),hora:'09:00',err:''};return render();}
     if(a==='editar'){const it=C.items.find(i=>i.id===id);if(!it)return;C.form={id:it.id,titulo:it.titulo,fecha:it.fecha,hora:it.hora,err:''};return render();}
     if(a==='cancelar'){C.form=null;return render();}
