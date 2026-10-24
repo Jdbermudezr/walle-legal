@@ -67,7 +67,7 @@ header{display:flex;align-items:center;gap:12px;margin-bottom:16px}
 .pill{font-size:11px;font-weight:700;padding:6px 11px;border-radius:99px;background:var(--tint);
   color:var(--in);border:1px solid var(--line);white-space:nowrap}
 
-.tabs{display:grid;grid-template-columns:1fr 1fr;gap:4px;background:var(--bg2);border:1px solid var(--line);
+.tabs{display:grid;grid-template-columns:1fr 1fr 1fr;gap:4px;background:var(--bg2);border:1px solid var(--line);
   border-radius:15px;padding:4px;margin-bottom:14px}
 .tabs button{border:0;background:transparent;color:var(--ink2);font:inherit;font-size:14.5px;font-weight:700;
   padding:11px;border-radius:11px;cursor:pointer;transition:.18s}
@@ -223,6 +223,37 @@ g.grp.dim rect.bar{opacity:.35}
 .note{text-align:center;color:var(--ink3);font-size:11.5px;margin-top:14px;line-height:1.6}
 .empty{text-align:center;color:var(--ink3);font-size:13.5px;padding:26px 0}
 @media(min-width:600px){ .kpis{grid-template-columns:repeat(3,1fr)} .kpi.wide{grid-column:auto} }
+
+/* ===== Calendario ===== */
+#cal .ch{display:flex;align-items:center;justify-content:space-between;margin:2px 2px 12px}
+#cal .ch b{font-size:17px;font-weight:750;letter-spacing:-.3px}
+#cal .nv{border:1px solid var(--line);background:var(--surf);color:var(--ink);width:36px;height:36px;border-radius:12px;font-size:17px;cursor:pointer}
+#cal .gr{display:grid;grid-template-columns:repeat(7,1fr);gap:5px;margin-bottom:16px}
+#cal .dw{font-size:11px;font-weight:700;color:var(--ink3);text-align:center;padding:4px 0}
+#cal .dc{aspect-ratio:1;border:1px solid transparent;background:var(--surf);border-radius:12px;font:inherit;font-size:14px;font-weight:600;color:var(--ink);cursor:pointer;position:relative;display:flex;align-items:center;justify-content:center;padding:0;box-shadow:var(--sh-s)}
+#cal .dc.v{background:transparent;box-shadow:none;cursor:default}
+#cal .dc.hoy{border-color:var(--brand)}
+#cal .dc.sel{background:var(--brand);color:#fff}
+#cal .dc i{position:absolute;bottom:6px;width:5px;height:5px;border-radius:50%;background:var(--gold)}
+#cal .dc i.h{background:var(--ink3);opacity:.6}
+#cal .dc.sel i{background:#fff;opacity:1}
+#cal .it{display:flex;align-items:center;gap:10px;padding:12px 0;border-top:1px solid var(--line)}
+#cal .it:first-of-type{border-top:0}
+#cal .hr{min-width:70px;font-size:12.5px;font-weight:750;color:var(--brand)}
+#cal .tt{flex:1;font-size:14.5px;font-weight:600;min-width:0;overflow-wrap:anywhere}
+#cal .tt small{display:block;font-size:11.5px;font-weight:600;color:var(--ink3);margin-top:2px}
+#cal .it.h .tt{text-decoration:line-through;color:var(--ink3)}
+#cal .ic{border:0;background:var(--bg2);color:var(--ink2);width:34px;height:34px;border-radius:10px;cursor:pointer;font-size:14px;flex:none}
+#cal .ic.w{width:auto;padding:0 10px;font-size:12px;font-weight:700;color:#B3261E}
+#cal .vacio{font-size:14px;color:var(--ink3);padding:6px 0 12px}
+#cal .nuevo{width:100%;border:1px dashed var(--line2);background:transparent;color:var(--brand);font:inherit;font-weight:750;font-size:14.5px;padding:13px;border-radius:14px;cursor:pointer;margin-top:6px}
+#cal .fi{width:100%;border:1px solid var(--line);background:var(--surf2);color:var(--ink);font:inherit;font-size:16px;padding:12px;border-radius:12px;margin-bottom:10px}
+#cal .fr{display:grid;grid-template-columns:1.4fr 1fr;gap:8px}
+#cal .fb{display:flex;gap:8px}
+#cal .fb button{flex:1;border:0;font:inherit;font-weight:750;font-size:14.5px;padding:13px;border-radius:12px;cursor:pointer}
+#cal .pri{background:var(--brand);color:#fff}
+#cal .sec{background:var(--bg2);color:var(--ink2)}
+#cal .err{color:#B3261E;font-size:13px;margin-bottom:8px}
 </style>
 </head>
 <body data-palette="#1B7A46,#D9A13B">
@@ -435,8 +466,9 @@ function render(){
   </div>
 
   <div class="tabs">
-    <button data-tab="resumen" aria-selected="${S.tab==='resumen'}">Resumen ejecutivo</button>
+    <button data-tab="resumen" aria-selected="${S.tab==='resumen'}">Resumen</button>
     <button data-tab="movs" aria-selected="${S.tab==='movs'}">Movimientos</button>
+    <button data-tab="cal" aria-selected="${S.tab==='cal'}">Calendario</button>
   </div>
 
   <div class="periodo">
@@ -604,6 +636,114 @@ aplicarTema();
   S.moneda=Object.entries(cuenta).sort((a,b)=>b[1]-a[1])[0][0];
   render();
 })();
+
+/* ===== Calendario (recordatorios) ===== */
+const REC='https://fnolzmacqnaxcktlxhxx.supabase.co/functions/v1/rec-api';
+const C={items:[],ok:false,cargando:false,intento:false,mes:null,sel:null,form:null,conf:null,msg:''};
+const MESES=['Enero','Febrero','Marzo','Abril','Mayo','Junio','Julio','Agosto','Septiembre','Octubre','Noviembre','Diciembre'];
+const DIAS=['Domingo','Lunes','Martes','Miércoles','Jueves','Viernes','Sábado'];
+const pad2=n=>String(n).padStart(2,'0');
+const bog=()=>new Date(Date.now()-5*3600e3);
+const ymd=d=>d.getUTCFullYear()+'-'+pad2(d.getUTCMonth()+1)+'-'+pad2(d.getUTCDate());
+const hora12=h=>{const [H,M]=h.split(':').map(Number);return ((H%12)||12)+':'+pad2(M)+' '+(H<12?'a.m.':'p.m.')};
+const fechaLarga=f=>{const [y,m,d]=f.split('-').map(Number);return DIAS[new Date(Date.UTC(y,m-1,d)).getUTCDay()]+' '+d+' de '+MESES[m-1].toLowerCase()};
+async function recApi(accion,extra){
+  try{const r=await fetch(REC,{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify(Object.assign({t:T,accion:accion},extra||{}))});return await r.json();}
+  catch(e){return {ok:false,mensaje:'Revisa tu internet e intenta de nuevo.'};}
+}
+async function calCargar(){
+  C.cargando=true;C.intento=true;render();
+  const r=await recApi('listar');
+  C.cargando=false;
+  if(r.ok){C.items=r.items||[];C.ok=true;C.msg='';}else{C.msg=r.mensaje||'No pudimos cargar tus recordatorios.';}
+  render();
+}
+function filaHTML(it){
+  const hecho=it.estado==='hecho';
+  const nota=it.estado==='enviado'?'<small>Aviso enviado</small>':'';
+  const borrar=C.conf===it.id?'<button class="ic w" data-a="borrar" data-id="'+it.id+'">¿Borrar?</button>':'<button class="ic" data-a="pedirborrar" data-id="'+it.id+'" aria-label="Borrar">🗑</button>';
+  return '<div class="it'+(hecho?' h':'')+'"><span class="hr">'+hora12(it.hora)+'</span><span class="tt">'+esc(it.titulo)+nota+'</span>'
+    +(hecho?'':'<button class="ic" data-a="hecho" data-id="'+it.id+'" aria-label="Marcar como hecho">✓</button><button class="ic" data-a="editar" data-id="'+it.id+'" aria-label="Editar">✎</button>')
+    +borrar+'</div>';
+}
+function formHTML(){
+  const f=C.form;
+  return '<div class="card"><h2>'+(f.id?'Editar recordatorio':'Nuevo recordatorio')+'</h2><div class="cap">Walle te lo escribe por WhatsApp ese día.</div>'
+   +(f.err?'<div class="err">'+esc(f.err)+'</div>':'')
+   +'<input class="fi" id="f-t" maxlength="80" placeholder="¿Qué quieres recordar?" value="'+esc(f.titulo)+'">'
+   +'<div class="fr"><input class="fi" id="f-f" type="date" min="'+ymd(bog())+'" value="'+esc(f.fecha)+'"><input class="fi" id="f-h" type="time" value="'+esc(f.hora)+'"></div>'
+   +'<div class="fb"><button class="sec" data-a="cancelar">Cancelar</button><button class="pri" data-a="guardar">Guardar</button></div></div>';
+}
+function calHTML(){
+  const hoy=ymd(bog());
+  if(!C.mes){const b=bog();C.mes=[b.getUTCFullYear(),b.getUTCMonth()];}
+  const [y,m]=C.mes;
+  const vivos=C.items.filter(i=>i.estado!=='cancelado');
+  const porDia={};vivos.forEach(i=>{(porDia[i.fecha]=porDia[i.fecha]||[]).push(i);});
+  const lead=(new Date(Date.UTC(y,m,1)).getUTCDay()+6)%7;
+  const n=new Date(Date.UTC(y,m+1,0)).getUTCDate();
+  let g='<div class="gr">'+['L','M','M','J','V','S','D'].map(d=>'<div class="dw">'+d+'</div>').join('');
+  for(let i=0;i<lead;i++)g+='<div class="dc v"></div>';
+  for(let d=1;d<=n;d++){
+    const f=y+'-'+pad2(m+1)+'-'+pad2(d), L=porDia[f]||[];
+    const pend=L.some(i=>i.estado!=='hecho');
+    g+='<button class="dc'+(f===hoy?' hoy':'')+(f===C.sel?' sel':'')+'" data-a="dia" data-f="'+f+'">'+d+(L.length?'<i class="'+(pend?'':'h')+'"></i>':'')+'</button>';
+  }
+  g+='</div>';
+  let h='<div id="cal"><div class="ch"><button class="nv" data-a="prev" aria-label="Mes anterior">‹</button><b>'+MESES[m]+' '+y+'</b><button class="nv" data-a="next" aria-label="Mes siguiente">›</button></div>'+g;
+  if(C.msg)h+='<div class="err">'+esc(C.msg)+'</div>';
+  if(C.form){h+=formHTML();}
+  else{
+    let titulo,lista;
+    if(C.sel){titulo=fechaLarga(C.sel);lista=porDia[C.sel]||[];}
+    else{titulo='Próximos';lista=vivos.filter(i=>i.estado!=='hecho'&&(i.fecha+'T'+i.hora)>=(hoy+'T00:00')).slice(0,6);}
+    h+='<div class="card"><h2>'+titulo+'</h2><div class="cap">'+(C.cargando&&!C.ok?'Cargando…':lista.length+' recordatorio'+(lista.length===1?'':'s'))+'</div>'
+      +(lista.length?lista.map(filaHTML).join(''):'<div class="vacio">'+(C.sel?'Nada para este día.':'No tienes recordatorios próximos.')+'</div>')
+      +'<button class="nuevo" data-a="nuevo">+ Nuevo recordatorio</button></div>';
+  }
+  return h+'</div>';
+}
+function calEventos(p){
+  p.onclick=async e=>{
+    const b=e.target.closest('[data-a]');if(!b)return;
+    const a=b.dataset.a,id=b.dataset.id;
+    if(a==='prev'||a==='next'){let [y,m]=C.mes;m+=a==='next'?1:-1;if(m<0){m=11;y--;}if(m>11){m=0;y++;}C.mes=[y,m];C.sel=null;C.conf=null;return render();}
+    if(a==='dia'){C.sel=C.sel===b.dataset.f?null:b.dataset.f;C.conf=null;return render();}
+    if(a==='nuevo'){C.form={id:'',titulo:'',fecha:C.sel||ymd(bog()),hora:'09:00',err:''};return render();}
+    if(a==='editar'){const it=C.items.find(i=>i.id===id);if(!it)return;C.form={id:it.id,titulo:it.titulo,fecha:it.fecha,hora:it.hora,err:''};return render();}
+    if(a==='cancelar'){C.form=null;return render();}
+    if(a==='pedirborrar'){C.conf=id;return render();}
+    if(a==='hecho'||a==='borrar'){
+      C.conf=null;b.disabled=true;
+      const r=await recApi(a,{id:id});
+      if(!r.ok)C.msg=r.mensaje||'No pudimos guardar. Intenta de nuevo.';else C.msg='';
+      return calCargar();
+    }
+    if(a==='guardar'){
+      const f=C.form;
+      f.titulo=p.querySelector('#f-t').value.trim();f.fecha=p.querySelector('#f-f').value;f.hora=p.querySelector('#f-h').value;
+      if(f.titulo.length<2){f.err='Escribe qué quieres recordar.';return render();}
+      if(!f.fecha||!f.hora){f.err='Elige la fecha y la hora.';return render();}
+      b.disabled=true;
+      const r=await recApi(f.id?'editar':'crear',{id:f.id||undefined,titulo:f.titulo,fecha:f.fecha,hora:f.hora});
+      if(!r.ok){f.err=r.mensaje||'No pudimos guardar. Intenta de nuevo.';return render();}
+      C.sel=f.fecha;const [yy,mm]=f.fecha.split('-').map(Number);C.mes=[yy,mm-1];C.form=null;C.msg='';
+      return calCargar();
+    }
+  };
+}
+const _renderBase=render;
+render=function(){
+  _renderBase();
+  if(S.tab!=='cal')return;
+  try{
+    const tabs=$.querySelector('.tabs');if(!tabs||!tabs.parentNode)return;
+    while(tabs.nextSibling)tabs.parentNode.removeChild(tabs.nextSibling);
+    const p=document.createElement('div');p.innerHTML=calHTML();
+    const panel=p.firstElementChild;tabs.parentNode.appendChild(panel);calEventos(panel);
+    if(!C.intento)calCargar();
+  }catch(e){console.error('calendario',e);}
+};
 </script>
 </body>
 </html>
